@@ -1,6 +1,15 @@
 @HostAddress = http://localhost:5137
-@jwt_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6InJhc2ltYyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzEzMjEyNjE3LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUxMzciLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxMzcifQ.zidIric6XDHrpLrvl0sRfMI1gnMppkug_DTCvxgLwvs
+@jwt_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6InJhc2ltYyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzEzMjE2MTU4LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUxMzciLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxMzcifQ.yzFTcHuPvaFvPfgg4jxdmJzU2OGzWPZ1j5864aW0lnM
 
+
+POST {{HostAddress}}/api/authentication
+Content-Type: application/json
+
+{
+    "username":"rasimc",
+    "password":"rasimc"
+}
+###
 
 GET {{HostAddress}}/api/users
 Accept: application/json
@@ -22,11 +31,4 @@ Authorization: Bearer {{jwt_token}}
 
 ###
 
-POST {{HostAddress}}/api/authentication
-Content-Type: application/json
-
-{
-    "username":"rasimc",
-    "password":"rasimc"
-}
 

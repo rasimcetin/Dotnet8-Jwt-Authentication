@@ -1,5 +1,6 @@
 ﻿using Dotnet8_Jwt_Authentication.Data;
 using Dotnet8_Jwt_Authentication.Dto;
+using Dotnet8_Jwt_Authentication.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,15 +10,13 @@ namespace Dotnet8_Jwt_Authentication.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController(UserDbContext userDbContext) : ControllerBase
+public class UsersController(IUserService userService) : ControllerBase
 {
     [HttpGet]
     [Authorize(Policy = "Admin")]
-    public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
     {
-        var users = await ((from user in userDbContext.Users
-                           orderby user.CreatedAt descending
-                           select new UserDto(user.Id, user.Name, user.SurName, user.Email, user.Username, user.Role, user.CreatedAt, user.UpdatedAt)).ToListAsync());
+        var users = await userService.GetUsers();
         return Ok(users);
     }
 
@@ -25,40 +24,29 @@ public class UsersController(UserDbContext userDbContext) : ControllerBase
     [Authorize(Policy = "User")]
     public async Task<ActionResult<UserDto>> GetUser(Guid id)
     {
-        var user = await userDbContext.Users.FindAsync(id);
-        if (user == null)
+        try
         {
-            return NotFound();
+            var userDto = await userService.GetUser(id);
+            return Ok(userDto);
         }
-
-        var userDto = new UserDto(user.Id, user.Name, user.SurName, user.Email, user.Username, user.Role, user.CreatedAt, user.UpdatedAt);
-        return Ok(userDto);
+        catch (Exception ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
     [HttpPost]
     //[Authorize(Policy = "Admin")]
-    public async Task<ActionResult<UserDto>> CreateUser(CreateUserDto createUserDto)
+    public async Task<ActionResult<Guid>> CreateUser(CreateUserDto createUserDto)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            CreatedAt = DateTimeOffset.UtcNow, 
-            UpdatedAt = DateTimeOffset.UtcNow, 
-            Name = createUserDto.Name, 
-            SurName = createUserDto.SurName, 
-            Email = createUserDto.Email, 
-            Username = createUserDto.Username,
-            Role = createUserDto.Role
-        };
-
-        userDbContext.Users.Add(user);
-        await userDbContext.SaveChangesAsync();
-        return Ok(user);
+        var userId = await userService.CreateUser(createUserDto);
+       
+        return CreatedAtAction(nameof(GetUser), new { id = userId }, userId);
     }
 
     [HttpPut("{id}")]
@@ -67,35 +55,29 @@ public class UsersController(UserDbContext userDbContext) : ControllerBase
     {
         if (!ModelState.IsValid) 
             return BadRequest(ModelState);
-
-        var user = await userDbContext.Users.FindAsync(id);
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        user.UpdatedAt = DateTimeOffset.UtcNow;
-        user.Name = updateUserDto.Name;
-        user.SurName = updateUserDto.SurName;
-        user.Email = updateUserDto.Email;
-        user.Username = updateUserDto.Username;
-
-        userDbContext.Users.Update(user);
-        await userDbContext.SaveChangesAsync();
         
-        var userDto = new UserDto(user.Id, user.Name, user.SurName, user.Email, user.Username, user.Role, user.CreatedAt, user.UpdatedAt);
-        return Ok(userDto);
+        try
+        {
+            var userDto = await userService.UpdateUser(id, updateUserDto);
+            return Ok(userDto);
+        }
+        catch (Exception ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
     [HttpDelete("{id}")]
     [Authorize(Policy = "Admin")]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
-        var user = await userDbContext.Users.FindAsync(id);
-        if (user == null) return NotFound();
-        
-        userDbContext.Users.Remove(user);
-        await userDbContext.SaveChangesAsync();
-        return NoContent();
+        try{
+            await userService.DeleteUser(id);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

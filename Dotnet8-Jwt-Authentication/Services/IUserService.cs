@@ -4,12 +4,12 @@ namespace Dotnet8_Jwt_Authentication.Services;
 
 public interface IUserService
 {
-    Task<IEnumerable<User>> GetUsers();
+    Task<IEnumerable<UserDto>> GetUsers();
     Task<UserDto> GetUser(Guid id);
-    UserDto CreateUser(CreateUserDto createUserDto);
-    UserDto UpdateUser(Guid id, UpdateUserDto updateUserDto);
-    void DeleteUser(Guid id);
+    Task<Guid> CreateUser(CreateUserDto createUserDto);
+    Task<UserDto> UpdateUser(Guid id, UpdateUserDto updateUserDto);
+    Task DeleteUser(Guid id);
 
-    User Authenticate(LoginDto loginDto);
+    Task<string> Authenticate(LoginDto loginDto);
 
 }
