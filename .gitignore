@@ -1,0 +1,53 @@
+# .NET Core
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+*.sln.docstates
+*.userosscache
+*.sln.ide/
+
+# Visual Studio Code
+.vscode/
+
+# React project
+node_modules/
+build/
+npm-debug.log
+yarn-error.log
+
+# User-specific files
+*.rsuser
+*.cache
+*.csproj.user
+*.swp
+*.swo
+*.*~
+project.lock.json
+project.fragment.lock.json
+applicationhost.config
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
