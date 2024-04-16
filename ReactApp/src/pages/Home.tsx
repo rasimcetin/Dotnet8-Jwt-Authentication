@@ -1,6 +1,18 @@
+import { useNavigate } from "react-router-dom";
+import List from "../components/List";
+import { token } from "../signals/AuthSignal";
 import { count, decrement, increment } from "../signals/UserSignal";
+import { useEffect } from "react";
 
 function Home() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (token.value == null) {
+      navigate("/login", { replace: true });
+    }
+  });
+
   return (
     <div className="flex flex-col justify-center items-center h-svh">
       <h3 className="text-3xl font-medium ">{count}</h3>
@@ -17,6 +29,9 @@ function Home() {
         >
           Decrement
         </button>
+      </div>
+      <div className="flex flex-col mt-4">
+        <List />
       </div>
     </div>
   );
