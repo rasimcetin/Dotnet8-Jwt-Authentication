@@ -1,4 +1,5 @@
 using System.Security.Cryptography.Xml;
+using Dotnet8_Jwt_Authentication;
 using Dotnet8_Jwt_Authentication.Data;
 using Dotnet8_Jwt_Authentication.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -24,7 +25,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy",
         builder => builder
-        .AllowAnyOrigin()
+        .WithOrigins("http://localhost:5173")
         .AllowAnyMethod()
         .AllowAnyHeader());
 });
@@ -51,6 +52,10 @@ builder.Services.AddAuthorizationBuilder()
 .AddPolicy("User", policy => {
     policy.RequireAuthenticatedUser();
     policy.RequireRole("User");
+})
+.AddPolicy("UserOrAdmin", policy => {
+    policy.RequireAuthenticatedUser();
+    policy.RequireRole("Admin", "User");
 });
 
 builder.Services.AddSwaggerGen(options =>
@@ -100,6 +105,42 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    using (var scope = app.Services.CreateScope()){
+        var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+        dbContext.Database.EnsureDeleted();
+        dbContext.Database.EnsureCreated();
+        User adminUser = new User
+        {
+            Id = Guid.NewGuid(),
+            Username = "admin",
+            Password = "admin",
+            Role = Role.Admin,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow,
+            Name = "Admin",
+            SurName = "Admin",
+            Email = "admin@localhost"
+        };
+
+        User user = new User
+        {
+            Id = Guid.NewGuid(),
+            Username = "user",
+            Password = "user",
+            Role = Role.User,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow,
+            Name = "User",
+            SurName = "User",
+            Email = "user@localhost"
+        };
+
+        dbContext.Users.Add(adminUser);
+        dbContext.Users.Add(user);
+        dbContext.SaveChanges();
+        
+    }
 }
 
 app.UseHttpsRedirection();

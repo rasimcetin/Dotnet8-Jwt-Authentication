@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Dotnet8_Jwt_Authentication.Data;
 using Dotnet8_Jwt_Authentication.Dto;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 namespace Dotnet8_Jwt_Authentication.Services;
@@ -11,10 +12,16 @@ public class UserService(UserDbContext userDbContext, IConfiguration configurati
 {
     public Task<string> Authenticate(LoginDto loginDto)
     {
+        var user = userDbContext.Users.FirstOrDefault(u => u.Username == loginDto.Username && u.Password == loginDto.Password);
+        if (user == null)
+        {   
+            return Task.FromResult(string.Empty);
+        }
+
          var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, loginDto.Username),
-            new Claim (ClaimTypes.Role, Role.Admin.ToString())    
+            new Claim (ClaimTypes.Role, user.Role.ToString())    
         };
 
         var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]));
@@ -43,6 +50,7 @@ public class UserService(UserDbContext userDbContext, IConfiguration configurati
             SurName = createUserDto.SurName, 
             Email = createUserDto.Email, 
             Username = createUserDto.Username,
+            Password = createUserDto.Password,
             Role = createUserDto.Role
         };
 
@@ -50,6 +58,29 @@ public class UserService(UserDbContext userDbContext, IConfiguration configurati
         await userDbContext.SaveChangesAsync();
 
         return user.Id;
+
+    }
+    
+    public async Task Register(RegisterDto registerDto)
+    {
+        var user = await userDbContext.Users.FirstOrDefaultAsync(u => u.Username == registerDto.Username && u.Password == registerDto.Password);
+        if (user != null)
+        {
+            throw new Exception("User already exists");
+        }
+
+       var newUser = new User
+        {
+            Id = Guid.NewGuid(),
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow,
+            Username = registerDto.Username,
+            Password = registerDto.Password,
+            Role = Role.User
+        };
+
+        await userDbContext.Users.AddAsync(newUser);
+        await userDbContext.SaveChangesAsync();
 
     }
 
@@ -105,7 +136,7 @@ public class UserService(UserDbContext userDbContext, IConfiguration configurati
         user.Name = updateUserDto.Name;
         user.SurName = updateUserDto.SurName;
         user.Email = updateUserDto.Email;
-        user.Username = updateUserDto.Username;
+        user.Role = updateUserDto.Role;
 
         userDbContext.Users.Update(user);
         await userDbContext.SaveChangesAsync();

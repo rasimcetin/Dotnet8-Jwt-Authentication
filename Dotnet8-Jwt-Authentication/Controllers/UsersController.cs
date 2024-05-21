@@ -13,7 +13,10 @@ namespace Dotnet8_Jwt_Authentication.Controllers;
 public class UsersController(IUserService userService) : ControllerBase
 {
     [HttpGet]
-    [Authorize(Policy = "Admin")]
+    [Authorize(Policy = "UserOrAdmin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
     {
         var users = await userService.GetUsers();
@@ -21,7 +24,11 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(Policy = "User")]
+    [Authorize(Policy = "UserOrAdmin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status405MethodNotAllowed)]
     public async Task<ActionResult<UserDto>> GetUser(Guid id)
     {
         try
@@ -36,7 +43,12 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpPost]
-    //[Authorize(Policy = "Admin")]
+    [Authorize(Policy = "Admin")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status405MethodNotAllowed)]
+    
     public async Task<ActionResult<Guid>> CreateUser(CreateUserDto createUserDto)
     {
         if (!ModelState.IsValid)
@@ -51,6 +63,10 @@ public class UsersController(IUserService userService) : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize(Policy = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status405MethodNotAllowed)]
     public async Task<ActionResult<UserDto>> UpdateUser(Guid id, UpdateUserDto updateUserDto)
     {
         if (!ModelState.IsValid) 
@@ -69,6 +85,10 @@ public class UsersController(IUserService userService) : ControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(Policy = "Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status405MethodNotAllowed)]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
         try{

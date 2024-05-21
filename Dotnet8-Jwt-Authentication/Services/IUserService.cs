@@ -4,6 +4,7 @@ namespace Dotnet8_Jwt_Authentication.Services;
 
 public interface IUserService
 {
+    Task Register(RegisterDto registerDto);
     Task<IEnumerable<UserDto>> GetUsers();
     Task<UserDto> GetUser(Guid id);
     Task<Guid> CreateUser(CreateUserDto createUserDto);
